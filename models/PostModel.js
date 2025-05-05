@@ -16,9 +16,22 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     images: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Image'
+    }],
+    likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    saves: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }]
 }, {
     timestamps: true

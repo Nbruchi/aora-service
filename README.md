@@ -63,7 +63,12 @@ A RESTful API backend for the Aora application, providing user authentication, p
 
 3. Set up environment variables (see [Environment Variables](#environment-variables))
 
-4. Start the development server:
+4. Run the migration script for existing posts (if needed):
+   ```bash
+   node utils/migratePostsCreator.js
+   ```
+
+5. Start the development server:
    ```bash
    npm start
    ```
@@ -156,6 +161,7 @@ JWT_SECRET=          # Secret for JWT token generation
     "images": ["imageId1", "imageId2"]
   }
   ```
+  Note: The creator field is automatically set to the authenticated user.
 
 #### 🔍 Get post by slug
 - **URL**: `/api/v1/posts/slug/:slug`
@@ -220,6 +226,7 @@ server/
 │   ├── postRoutes.js
 │   └── imageRoutes.js
 ├── utils/              # Utility functions
+│   └── migratePostsCreator.js # Migration script for posts
 ├── .env                # Environment variables
 ├── .env.example        # Example environment variables
 ├── index.js            # Application entry point

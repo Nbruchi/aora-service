@@ -6,7 +6,10 @@ const {
     getPostById, 
     getPostBySlug, 
     updatePost, 
-    deletePost 
+    deletePost,
+    likePost,
+    savePost,
+    getPostInteraction
 } = require('../controllers/postController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
@@ -23,5 +26,10 @@ router.get('/slug/:slug', getPostBySlug);
 router.get('/:id', getPostById);
 router.put('/:id',authMiddleware, updatePost);
 router.delete('/:id',authMiddleware, deletePost);
+
+// Like, save, and get interaction status for a post
+router.post('/:id/like', authMiddleware, likePost);
+router.post('/:id/save', authMiddleware, savePost);
+router.get('/:id/interaction', authMiddleware, getPostInteraction);
 
 module.exports = router;
