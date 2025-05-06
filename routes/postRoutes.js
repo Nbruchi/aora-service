@@ -9,7 +9,8 @@ const {
     deletePost,
     likePost,
     savePost,
-    getPostInteraction
+    getPostInteraction,
+    getPostsByUserId
 } = require('../controllers/postController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
@@ -31,5 +32,8 @@ router.delete('/:id',authMiddleware, deletePost);
 router.post('/:id/like', authMiddleware, likePost);
 router.post('/:id/save', authMiddleware, savePost);
 router.get('/:id/interaction', authMiddleware, getPostInteraction);
+
+// Get posts by user ID
+router.get('/user/:userId', getPostsByUserId);
 
 module.exports = router;

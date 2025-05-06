@@ -15,7 +15,11 @@ const imageRoutes = require("./routes/imageRoutes");
 
 connectDB();
 
-app.use(cors());
+// Configure CORS to allow requests from the mobile app
+app.use(cors({
+  origin: true, // Allow requests from any origin in development
+  credentials: true, // Allow cookies to be sent with requests
+}));
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(express.json())

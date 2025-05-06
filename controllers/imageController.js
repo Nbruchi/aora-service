@@ -79,6 +79,18 @@ const getImageById = asyncHandler(async (req, res) => {
     res.send(image.data);
 });
 
+const getImagesByUserId = asyncHandler(async (req, res) => {
+    const { userId } = req.user;
+    validateID(userId);
+
+    try{
+        const images = await Image.find({user: userId}).select("_id name contentType size createdAt updatedAt")
+        res.status(200).json(images);
+    }catch (error) {
+        res.status(500).json({message: error.message});
+    }
+})
+
 // Delete an image
 const deleteImage = asyncHandler(async (req, res) => {
     const { id } = req.params;
@@ -100,5 +112,6 @@ module.exports = {
     getImages,
     createImage,
     getImageById,
-    deleteImage
+    deleteImage,
+    getImagesByUserId
 };
