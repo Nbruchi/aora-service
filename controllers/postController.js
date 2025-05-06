@@ -5,6 +5,26 @@ const formatNumber = require('../utils/formatNumber');
 const asyncHandler = require("express-async-handler");
 const slugify = require('slugify');
 
+// Helper function to format post counts and check user interaction
+const formatPostCounts = (post, user) => {
+    const postObj = post.toObject();
+    const likesCount = post.likes ? post.likes.length : 0;
+    const savesCount = post.saves ? post.saves.length : 0;
+
+    postObj.likesCount = likesCount;
+    postObj.savesCount = savesCount;
+    postObj.formattedLikes = `${formatNumber(likesCount)} ${likesCount === 1 ? 'like' : 'likes'}`;
+    postObj.formattedSaves = `${formatNumber(savesCount)} ${savesCount === 1 ? 'save' : 'saves'}`;
+
+    // Check if user is authenticated and has liked/saved the post
+    if (user) {
+        postObj.isLiked = post.likes.includes(user._id);
+        postObj.isSaved = post.saves.includes(user._id);
+    }
+
+    return postObj;
+};
+
 // Create a new post
 const createPost = asyncHandler(async (req, res) => {
     const { title, description, images } = req.body;
@@ -57,14 +77,7 @@ const createPost = asyncHandler(async (req, res) => {
         });
 
     // Add formatted like and save counts
-    const postObj = populatedPost.toObject();
-    const likesCount = populatedPost.likes ? populatedPost.likes.length : 0;
-    const savesCount = populatedPost.saves ? populatedPost.saves.length : 0;
-
-    postObj.likesCount = likesCount;
-    postObj.savesCount = savesCount;
-    postObj.formattedLikes = `${formatNumber(likesCount)} ${likesCount === 1 ? 'like' : 'likes'}`;
-    postObj.formattedSaves = `${formatNumber(savesCount)} ${savesCount === 1 ? 'save' : 'saves'}`;
+    const postObj = formatPostCounts(populatedPost, req.user);
 
     // For a new post, the creator is automatically the first to like it
     postObj.isLiked = true;
@@ -99,24 +112,7 @@ const getPosts = asyncHandler(async (req, res) => {
         });
 
     // Add formatted like and save counts to each post
-    const postsWithFormattedCounts = posts.map(post => {
-        const postObj = post.toObject();
-        const likesCount = post.likes ? post.likes.length : 0;
-        const savesCount = post.saves ? post.saves.length : 0;
-
-        postObj.likesCount = likesCount;
-        postObj.savesCount = savesCount;
-        postObj.formattedLikes = `${formatNumber(likesCount)} ${likesCount === 1 ? 'like' : 'likes'}`;
-        postObj.formattedSaves = `${formatNumber(savesCount)} ${savesCount === 1 ? 'save' : 'saves'}`;
-
-        // Check if user is authenticated and has liked/saved the post
-        if (req.user) {
-            postObj.isLiked = post.likes.includes(req.user._id);
-            postObj.isSaved = post.saves.includes(req.user._id);
-        }
-
-        return postObj;
-    });
+    const postsWithFormattedCounts = posts.map(post => formatPostCounts(post, req.user));
 
     res.json(postsWithFormattedCounts);
 });
@@ -142,20 +138,7 @@ const getPostById = asyncHandler(async (req, res) => {
     }
 
     // Add formatted like and save counts
-    const postObj = post.toObject();
-    const likesCount = post.likes ? post.likes.length : 0;
-    const savesCount = post.saves ? post.saves.length : 0;
-
-    postObj.likesCount = likesCount;
-    postObj.savesCount = savesCount;
-    postObj.formattedLikes = `${formatNumber(likesCount)} ${likesCount === 1 ? 'like' : 'likes'}`;
-    postObj.formattedSaves = `${formatNumber(savesCount)} ${savesCount === 1 ? 'save' : 'saves'}`;
-
-    // Check if user is authenticated and has liked/saved the post
-    if (req.user) {
-        postObj.isLiked = post.likes.includes(req.user._id);
-        postObj.isSaved = post.saves.includes(req.user._id);
-    }
+    const postObj = formatPostCounts(post, req.user);
 
     res.json(postObj);
 });
@@ -180,20 +163,7 @@ const getPostBySlug = asyncHandler(async (req, res) => {
     }
 
     // Add formatted like and save counts
-    const postObj = post.toObject();
-    const likesCount = post.likes ? post.likes.length : 0;
-    const savesCount = post.saves ? post.saves.length : 0;
-
-    postObj.likesCount = likesCount;
-    postObj.savesCount = savesCount;
-    postObj.formattedLikes = `${formatNumber(likesCount)} ${likesCount === 1 ? 'like' : 'likes'}`;
-    postObj.formattedSaves = `${formatNumber(savesCount)} ${savesCount === 1 ? 'save' : 'saves'}`;
-
-    // Check if user is authenticated and has liked/saved the post
-    if (req.user) {
-        postObj.isLiked = post.likes.includes(req.user._id);
-        postObj.isSaved = post.saves.includes(req.user._id);
-    }
+    const postObj = formatPostCounts(post, req.user);
 
     res.json(postObj);
 });
@@ -243,20 +213,7 @@ const updatePost = asyncHandler(async (req, res) => {
         });
 
     // Add formatted like and save counts
-    const postObj = populatedPost.toObject();
-    const likesCount = populatedPost.likes ? populatedPost.likes.length : 0;
-    const savesCount = populatedPost.saves ? populatedPost.saves.length : 0;
-
-    postObj.likesCount = likesCount;
-    postObj.savesCount = savesCount;
-    postObj.formattedLikes = `${formatNumber(likesCount)} ${likesCount === 1 ? 'like' : 'likes'}`;
-    postObj.formattedSaves = `${formatNumber(savesCount)} ${savesCount === 1 ? 'save' : 'saves'}`;
-
-    // Check if user is authenticated and has liked/saved the post
-    if (req.user) {
-        postObj.isLiked = populatedPost.likes.includes(req.user._id);
-        postObj.isSaved = populatedPost.saves.includes(req.user._id);
-    }
+    const postObj = formatPostCounts(populatedPost, req.user);
 
     res.json(postObj);
 });
@@ -384,6 +341,28 @@ const getPostInteraction = asyncHandler(async (req, res) => {
     });
 });
 
+// Get posts by user ID
+const getPostsByUserId = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+    validateID(userId);
+
+    // Find all posts created by the specified user
+    const posts = await Post.find({ creator: userId })
+        .populate({
+            path: 'images',
+            select: '-data'
+        })
+        .populate({
+            path: 'creator',
+            select: 'username email'
+        });
+
+    // Add formatted like and save counts to each post
+    const postsWithFormattedCounts = posts.map(post => formatPostCounts(post, req.user));
+
+    res.json(postsWithFormattedCounts);
+});
+
 module.exports = {
     createPost,
     getPosts,
@@ -393,5 +372,6 @@ module.exports = {
     deletePost,
     likePost,
     savePost,
-    getPostInteraction
+    getPostInteraction,
+    getPostsByUserId
 };

@@ -5,7 +5,7 @@ const {
     createImage, 
     getImageById, 
     deleteImage,
-    getImages
+    getImages, getImagesByUserId
 } = require('../controllers/imageController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
@@ -13,6 +13,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.post('/', uploadImage,authMiddleware, createImage);
 
 // Get or delete an image by ID
+router.get('/user/:userId', authMiddleware, getImagesByUserId);
 router.get('/', getImages);
 router.get('/:id', getImageById);
 router.delete('/:id',authMiddleware, deleteImage);
